@@ -1,4 +1,4 @@
-# 🧠 EEG–EMG Fusion for Upper-Limb Gesture Classification  
+# EEG–EMG Fusion for Upper-Limb Gesture Classification  
 ### Using Machine Learning and Deep Learning Models  
 
 ---
@@ -49,7 +49,7 @@ Each of the 11 subjects performed **7 gestures** with **6 trials** per gesture, 
 
 ---
 
-## 📊 Feasibility & Preliminary Analysis  
+## Feasibility & Preliminary Analysis  
 
 ### **4.1.1 EEG Channel Correlation Heatmap**  
 - Confirms spatial coherence across 8 EEG channels.  
