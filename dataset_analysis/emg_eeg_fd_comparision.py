@@ -1,6 +1,4 @@
-# ==========================================
 # 4.1.3 EEG vs EMG Frequency Distribution Comparison (3 Subjects)
-# ==========================================
 
 import os
 import numpy as np
@@ -8,9 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.signal import welch, butter, sosfiltfilt, iirnotch, filtfilt, detrend
 
-# --------------------------
-# CONFIGURATION
-# --------------------------
+# CONFIGURATION ----
 base_eeg = "/Users/muskaan_garg_/GitHub/eeg_emg_fusion_ml/Dataset- 8 channel EMG, EEG upper limb gesture data/EEG_DATA/data/csv_data"
 base_emg = "/Users/muskaan_garg_/GitHub/eeg_emg_fusion_ml/Dataset- 8 channel EMG, EEG upper limb gesture data/EMG_DATA/data/csv_data"
 
@@ -21,9 +17,8 @@ run = 1
 fs_eeg = 250.0  # Hz (OpenBCI Ultracortex IV)
 fs_emg = 200.0  # Hz (Myo Armband)
 
-# --------------------------
-# FILTERING FUNCTIONS
-# --------------------------
+
+# FILTERING FUNCTIONS ----
 def preprocess_eeg(x, fs):
     x = detrend(x, axis=0, type='constant')
     sos = butter(4, [0.5, 45], btype='bandpass', fs=fs, output='sos')
@@ -38,9 +33,8 @@ def preprocess_emg(x, fs):
     x = sosfiltfilt(sos, x, axis=0)
     return x
 
-# --------------------------
-# PSD FUNCTION
-# --------------------------
+
+# PSD FUNCTION ----
 def mean_psd(data, fs):
     psds = []
     for ch in range(data.shape[1]):
@@ -48,9 +42,7 @@ def mean_psd(data, fs):
         psds.append(pxx)
     return f, np.mean(psds, axis=0)
 
-# --------------------------
-# MAIN LOOP — 3 SUBJECTS
-# --------------------------
+
 for subject in subjects:
     eeg_path = os.path.join(base_eeg, f"subject_{subject}", f"S{subject}_R{run}_G{gesture}.csv")
     emg_path = os.path.join(base_emg, f"subject_{subject}", f"S{subject}_R{run}_G{gesture}.csv")
@@ -65,7 +57,7 @@ for subject in subjects:
     eeg = pd.read_csv(eeg_path).values
     emg = pd.read_csv(emg_path).values
 
-    # Ensure (samples × channels)
+    # Ensure - samples × channels
     if eeg.shape[0] < eeg.shape[1]:
         eeg = eeg.T
     if emg.shape[0] < emg.shape[1]:
@@ -83,9 +75,8 @@ for subject in subjects:
     psd_eeg_db = 10 * np.log10(np.maximum(psd_eeg, 1e-12))
     psd_emg_db = 10 * np.log10(np.maximum(psd_emg, 1e-12))
 
-    # --------------------------
-    # VISUALISATION
-    # --------------------------
+
+    # PLOT ----
     plt.figure(figsize=(9, 6))
     plt.plot(freqs_eeg, psd_eeg_db, label="EEG (250 Hz)", color='blue', linewidth=1.5)
     plt.plot(freqs_emg, psd_emg_db, label="EMG (200 Hz)", color='red', linewidth=1.5)

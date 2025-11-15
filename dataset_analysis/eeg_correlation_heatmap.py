@@ -1,6 +1,5 @@
-# ==========================================
 # EEG Channel Correlation Heatmap (Display Only for 3 Subjects)
-# ==========================================
+
 
 import pandas as pd
 import numpy as np
@@ -8,18 +7,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-# --------------------------
-# CONFIGURATION
-# --------------------------
+
+# CONFIGURATION ----
 base_path = "/Users/muskaan_garg_/GitHub/eeg_emg_fusion_ml/Dataset- 8 channel EMG, EEG upper limb gesture data/EEG_DATA/data/csv_data"
 
 subjects = [1, 2, 3]  # Subjects to process
 run = 1
 gesture = 3
 
-# --------------------------
-# MAIN LOOP
-# --------------------------
+
 for subject in subjects:
     file_path = os.path.join(base_path, f"subject_{subject}", f"S{subject}_R{run}_G{gesture}.csv")
 
@@ -33,14 +29,14 @@ for subject in subjects:
     df = pd.read_csv(file_path)
     data = df.values
 
-    # Ensure shape = (samples, channels)
+    # Ensure shape- samples, channels
     if data.shape[0] < data.shape[1]:
         data = data.T
 
     # Compute correlation matrix
     corr_matrix = np.corrcoef(data.T)
 
-    # Plot heatmap
+    # PLOT ----
     plt.figure(figsize=(7, 6))
     sns.heatmap(
         corr_matrix,

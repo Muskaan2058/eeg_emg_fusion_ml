@@ -1,19 +1,17 @@
-# ==========================================
+
 # EEG Power Spectral Density — Mean ± SE by Gesture
-# (OpenBCI Ultracortex IV: 8-ch @ 250 Hz)
-# ==========================================
 
 import os, numpy as np, pandas as pd, matplotlib.pyplot as plt
 from scipy.signal import welch, butter, sosfiltfilt, iirnotch, filtfilt, detrend
 
-# ---- PATHS / CONFIG ----
+# PATHS / CONFIG ----
 base = "/Users/muskaan_garg_/GitHub/eeg_emg_fusion_ml/Dataset- 8 channel EMG, EEG upper limb gesture data/EEG_DATA/data/csv_data"
 subjects = [1, 2, 3]
 gestures = [1, 2, 3, 4, 5, 6, 7]
 runs = [1, 2, 3, 4, 5, 6]
 fs = 250.0  # EEG sampling rate (OpenBCI)
 
-# ---- PREPROCESSING
+# PREPROCESSING ----
 def bandpass_notch(x, fs, lo=0.5, hi=45.0, notch_f=50.0, q=30.0):
     # x: (samples, channels)
     y = detrend(x, axis=0, type='constant')
@@ -34,7 +32,7 @@ for s in subjects:
 
             X = pd.read_csv(fp).values
             if X.shape[0] < X.shape[1]:
-                X = X.T  # ensure (samples, channels)
+                X = X.T  # ensure - samples, channels
 
             Xf = bandpass_notch(X, fs)
 
@@ -63,6 +61,7 @@ for s in subjects:
         plt.plot(f, mdB, label=f"G{g}")
         plt.fill_between(f, mdB - sedB, mdB + sedB, alpha=0.15)
 
+    # PLOT ----
     plt.xlim(0, 50)
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Power (dB re V²/Hz)")
