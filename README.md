@@ -26,10 +26,10 @@ Develop and evaluate a multimodal framework that integrates EEG and EMG signals 
 [EEG–EMG Dataset for Upper Limb Gesture Classification (Mendeley)](https://data.mendeley.com/datasets/m6t78vngbt/1)  
 
 **Specifications:**  
-| Modality | Device | Channels | Sampling Rate | Description |
-|-----------|---------|-----------|----------------|--------------|
-| **EEG** | OpenBCI Ultracortex IV | 8 | 250 Hz | Cortical neural activity |
-| **EMG** | Myo Armband | 8 | 200 Hz | Muscular activation from upper limb |
+| Modality | Device                 | Channels | Sampling Rate | Description                         |
+|----------|------------------------|----------|---------------|-------------------------------------|
+| **EEG**  | OpenBCI Ultracortex IV | 8        | 250 Hz        | Cortical neural activity            |
+| **EMG**  | Myo Armband            | 8        | 200 Hz        | Muscular activation from upper limb |
 
 Each of the 11 subjects performed **7 gestures** with **6 trials** per gesture, yielding synchronized EEG and EMG recordings for multimodal analysis.  
 
