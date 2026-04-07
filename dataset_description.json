@@ -1,0 +1,12 @@
+{"Name":"NeBULA (Neuromechanical Biomarkers for Upper Limb Assessment)",
+ "BIDSVersion":"1.2.0",
+ "License":"CC BY",
+ "Authors":"F. Garro; E. Fenoglio; I. Ceroni; I. Forsiuk; M. Canepa; M. Mozzon;A. Bruschi;F. Zippo;M. Laffranchi; L. deMichieli; S. Buccelli;M. Chiappalone;M. Semprini ",
+ "Acknowledgements":"See Zenodo repository at DOI ",
+ "HowToAcknowledge":"See Zenodo repository at DOI ",
+ "Funding":"Supported by the Istituto Nazionale Assicurazione Infortuni sul Lavoro (INAIL) (Project grant number PR19-RR-P2).",
+ "ReferencesAndLinks":"See Zenodo repository for an updated list of references ",
+ "DatasetDOI":"10.5281/zenodo.13627307",
+ "InstitutionName":"Istituto Italiano di Tecnologia",
+ "InstitutionAddress":"Via Morego 30",
+ "InstitutionalDepartmentName":"Rehab Technologies"}

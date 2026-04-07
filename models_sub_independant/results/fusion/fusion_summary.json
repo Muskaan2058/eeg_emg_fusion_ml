@@ -1,0 +1,125 @@
+{
+  "model": "EEG_EMG_FUSION",
+  "experiment": "subject_independent",
+  "device": "mps",
+  "n_params": 158952,
+  "best_epoch": 7,
+  "best_val_f1": 0.8755811789952874,
+  "best_val_loss": 0.4720568494002024,
+  "test_accuracy": 0.7823033707865169,
+  "test_f1_macro": 0.7839892888279985,
+  "confusion_matrix": [
+    [
+      164,
+      54,
+      18
+    ],
+    [
+      9,
+      191,
+      36
+    ],
+    [
+      1,
+      37,
+      202
+    ]
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 0.9425287356321839,
+      "recall": 0.6949152542372882,
+      "f1-score": 0.8,
+      "support": 236.0
+    },
+    "1": {
+      "precision": 0.6773049645390071,
+      "recall": 0.809322033898305,
+      "f1-score": 0.7374517374517374,
+      "support": 236.0
+    },
+    "2": {
+      "precision": 0.7890625,
+      "recall": 0.8416666666666667,
+      "f1-score": 0.8145161290322581,
+      "support": 240.0
+    },
+    "accuracy": 0.7823033707865169,
+    "macro avg": {
+      "precision": 0.8029654000570637,
+      "recall": 0.7819679849340866,
+      "f1-score": 0.7839892888279985,
+      "support": 712.0
+    },
+    "weighted avg": {
+      "precision": 0.8028872938769678,
+      "recall": 0.7823033707865169,
+      "f1-score": 0.7841607879302698,
+      "support": 712.0
+    }
+  },
+  "train_subjects": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    7,
+    10,
+    11,
+    14,
+    15,
+    16,
+    18,
+    19,
+    20,
+    23,
+    25,
+    29,
+    31,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40
+  ],
+  "val_subjects": [
+    13,
+    22,
+    26,
+    27,
+    32
+  ],
+  "test_subjects": [
+    8,
+    9,
+    17,
+    24,
+    30,
+    33
+  ],
+  "config": {
+    "batch_size": 64,
+    "epochs": 160,
+    "lr": 0.0005,
+    "dropout": 0.3,
+    "patience": 30,
+    "weight_decay": 0.0001,
+    "label_smoothing": 0.05,
+    "emg_window_starts": [
+      120,
+      160,
+      200,
+      240,
+      280,
+      320
+    ],
+    "eeg_context_starts": [
+      40,
+      80,
+      120
+    ]
+  }
+}

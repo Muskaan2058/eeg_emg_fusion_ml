@@ -1,0 +1,116 @@
+{
+  "model": "EMG_HYBRID_CNN_LSTM",
+  "experiment": "subject_independent",
+  "device": "mps",
+  "n_params": 105700,
+  "best_epoch": 13,
+  "test_accuracy": 0.8412921348314607,
+  "test_f1_macro": 0.8421726468412668,
+  "confusion_matrix": [
+    [
+      181,
+      41,
+      14
+    ],
+    [
+      11,
+      207,
+      18
+    ],
+    [
+      0,
+      29,
+      211
+    ]
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 0.9427083333333334,
+      "recall": 0.7669491525423728,
+      "f1-score": 0.8457943925233645,
+      "support": 236.0
+    },
+    "1": {
+      "precision": 0.7472924187725631,
+      "recall": 0.8771186440677966,
+      "f1-score": 0.8070175438596491,
+      "support": 236.0
+    },
+    "2": {
+      "precision": 0.8683127572016461,
+      "recall": 0.8791666666666667,
+      "f1-score": 0.8737060041407867,
+      "support": 240.0
+    },
+    "accuracy": 0.8412921348314607,
+    "macro avg": {
+      "precision": 0.852771169769181,
+      "recall": 0.841078154425612,
+      "f1-score": 0.8421726468412668,
+      "support": 712.0
+    },
+    "weighted avg": {
+      "precision": 0.8528584820581273,
+      "recall": 0.8412921348314607,
+      "f1-score": 0.8423498005339608,
+      "support": 712.0
+    }
+  },
+  "train_subjects": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    7,
+    10,
+    11,
+    14,
+    15,
+    16,
+    18,
+    19,
+    20,
+    23,
+    25,
+    29,
+    31,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40
+  ],
+  "val_subjects": [
+    13,
+    22,
+    26,
+    27,
+    32
+  ],
+  "test_subjects": [
+    8,
+    9,
+    17,
+    24,
+    30,
+    33
+  ],
+  "kept_window_starts": [
+    120,
+    160,
+    200,
+    240,
+    280,
+    320
+  ],
+  "config": {
+    "batch_size": 64,
+    "epochs": 160,
+    "lr": 0.0005,
+    "dropout": 0.3,
+    "patience": 30
+  }
+}

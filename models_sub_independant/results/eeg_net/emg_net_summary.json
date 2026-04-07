@@ -1,0 +1,133 @@
+{
+  "model": "EMGNet",
+  "experiment": "subject_independent",
+  "config": {
+    "data_dir": "../preprocessed",
+    "results_dir": "./results/eeg_net",
+    "x_name": "X_emg_win.npy",
+    "y_name": "y_win.npy",
+    "s_name": "subject_ids_win.npy",
+    "t_name": "trial_ids_win.npy",
+    "batch_size": 64,
+    "epochs": 100,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "patience": 15,
+    "seed": 42,
+    "n_channels": 11,
+    "n_classes": 3
+  },
+  "device": "mps",
+  "n_params": 100355,
+  "best_epoch": 25,
+  "best_val_f1": 0.9335968001980041,
+  "best_val_loss": 0.23909508725007375,
+  "test_loss": 0.4996738757184717,
+  "test_accuracy": 0.7991573033707865,
+  "test_f1_macro": 0.8006715473747551,
+  "confusion_matrix": [
+    [
+      154,
+      73,
+      9
+    ],
+    [
+      4,
+      213,
+      19
+    ],
+    [
+      0,
+      38,
+      202
+    ]
+  ],
+  "train_subjects": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    7,
+    10,
+    11,
+    14,
+    15,
+    16,
+    18,
+    19,
+    20,
+    23,
+    25,
+    29,
+    31,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40
+  ],
+  "val_subjects": [
+    13,
+    22,
+    26,
+    27,
+    32
+  ],
+  "test_subjects": [
+    8,
+    9,
+    17,
+    24,
+    30,
+    33
+  ],
+  "n_train_samples": 2980,
+  "n_val_samples": 600,
+  "n_test_samples": 712,
+  "kept_window_starts": [
+    120,
+    160,
+    200,
+    240,
+    280,
+    320
+  ],
+  "sequence_length": 3,
+  "classification_report": {
+    "0": {
+      "precision": 0.9746835443037974,
+      "recall": 0.652542372881356,
+      "f1-score": 0.7817258883248731,
+      "support": 236.0
+    },
+    "1": {
+      "precision": 0.6574074074074074,
+      "recall": 0.902542372881356,
+      "f1-score": 0.7607142857142857,
+      "support": 236.0
+    },
+    "2": {
+      "precision": 0.8782608695652174,
+      "recall": 0.8416666666666667,
+      "f1-score": 0.8595744680851064,
+      "support": 240.0
+    },
+    "accuracy": 0.7991573033707865,
+    "macro avg": {
+      "precision": 0.836783940425474,
+      "recall": 0.7989171374764595,
+      "f1-score": 0.8006715473747551,
+      "support": 712.0
+    },
+    "weighted avg": {
+      "precision": 0.8370169568813153,
+      "recall": 0.7991573033707865,
+      "f1-score": 0.8010024626596446,
+      "support": 712.0
+    }
+  }
+}
