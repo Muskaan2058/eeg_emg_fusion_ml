@@ -1,44 +1,6 @@
+
 """
-NeBULA — Subject-Dependent Epoch Windowing
-==========================================
-EEG-EMG Fusion for Upper-Limb Movement Decoding
-Muskaan Garg | H00416442 | Heriot-Watt University
-
-PURPOSE:
-  Loads the per-subject trial arrays already saved by epoch.py
-  (preprocessed/sub-XX/sub-XX_free_eeg.npy etc.), applies sliding
-  window, and splits chronologically by trial order into
-  train / val / test for subject-dependent training.
-
-WHY SUBJECT-DEPENDENT:
-  Each model is trained and tested on the SAME subject.
-  This tests how well a model learns one person's patterns,
-  rather than generalising across people.
-  EEG→EMG timing delay is subject-specific (RQ3), so this
-  approach is also used for the timing analysis pipeline.
-
-SPLIT (chronological by trial):
-  Train : first 70% of trials  (~20 trials → ~220 windows)
-  Val   : next  15% of trials  (~4  trials → ~44  windows)
-  Test  : last  15% of trials  (~5  trials → ~55  windows)
-
-  Chronological split is essential — random split would leak
-  future trial information into training.
-
-WINDOW:
-  size=80 samples (400ms at 200Hz)
-  step=40 samples (200ms, 50% overlap)
-  → ~11 windows per trial
-
-OUTPUT (saved to preprocessed_sub_dep/sub-XX/):
-  X_eeg_train.npy, X_eeg_val.npy, X_eeg_test.npy
-  X_emg_train.npy, X_emg_val.npy, X_emg_test.npy
-  y_train.npy,     y_val.npy,     y_test.npy
-
-Usage:
-    python epoch_sub_dep.py
-    python epoch_sub_dep.py --subjects 01 02 04
-    python epoch_sub_dep.py --all-subjects
+NeBULA Dataset -  Subject-Dependent Epoch Windowing
 """
 
 import os
@@ -46,9 +8,9 @@ import sys
 import argparse
 import numpy as np
 
-# ─────────────────────────────────────────────
+
 #  Constants
-# ─────────────────────────────────────────────
+# ----------------------------------------------
 
 WIN_SIZE = 80
 WIN_STEP = 40
@@ -58,9 +20,9 @@ VAL_RATIO   = 0.15
 # test gets the remainder
 
 
-# ─────────────────────────────────────────────
+
 #  Helpers
-# ─────────────────────────────────────────────
+# ----------------------------------------------
 
 def find_preprocessed_root(explicit=None):
     candidates = [explicit, './preprocessed', '../preprocessed']
@@ -118,9 +80,9 @@ def chronological_split(n_trials):
     return train, val, test
 
 
-# ─────────────────────────────────────────────
+
 #  Main
-# ─────────────────────────────────────────────
+# ----------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(
@@ -136,10 +98,10 @@ def main():
     subjects = get_subjects(pre_root, args.subjects)
     os.makedirs(args.output, exist_ok=True)
 
-    print("=" * 65)
+    print("-" * 60)
     print("  NeBULA — Subject-Dependent Windowing")
     print("  Muskaan Garg | H00416442 | Heriot-Watt University")
-    print("=" * 65)
+    print("-" * 60)
     print(f"  Source     : {pre_root}")
     print(f"  Output     : {args.output}")
     print(f"  Subjects   : {subjects}")
@@ -199,13 +161,13 @@ def main():
         processed += 1
 
     print()
-    print("=" * 65)
+    print("-" * 60)
     print(f"  Subjects processed : {processed}")
     print(f"  Saved to           : {args.output}/sub-XX/")
     print(f"  Files per subject  : X_eeg_train/val/test.npy")
     print(f"                       X_emg_train/val/test.npy")
     print(f"                       y_train/val/test.npy")
-    print("=" * 65)
+    print("-" * 60)
 
 
 if __name__ == '__main__':

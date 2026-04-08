@@ -1,10 +1,10 @@
 """
-EMG CNN-LSTM — Subject-Independent Classification (NeBULA)
-==========================================================
+NeBULA Dataset - EMG CNN-LSTM — Subject-Independent Classification
+-------------------------------------------------------------
+
 Hybrid model combining a CNN + BiLSTM branch (raw signal)
 with a handcrafted feature branch (RMS, mean, std, waveform length).
 
-Key design choices:
   - Execution-phase windows only (100ms to 1100ms post-onset)
   - 3 consecutive windows concatenated per trial (240 samples)
   - Two parallel branches merged before the classifier
@@ -27,7 +27,8 @@ from sklearn.metrics import (
     classification_report,
 )
 
-# ================= CONFIG =================
+# CONFIG
+# ----------------------------------------------
 DATA_DIR    = "../preprocessed"
 RESULTS_DIR = "./results/emg_cnn_lstm"
 
@@ -48,7 +49,6 @@ KEEP_WINDOW_STARTS = {120, 160, 200, 240, 280, 320}
 
 N_CHANNELS = 11
 N_CLASSES  = 3
-# ==========================================
 
 
 def set_seed(seed: int):
@@ -66,7 +66,8 @@ def get_device():
     return torch.device("cpu")
 
 
-# ================= FEATURE ENGINEERING =================
+# FEATURE ENGINEERING
+# ----------------------------------------------
 
 def compute_emg_features(X: np.ndarray) -> np.ndarray:
     """
@@ -103,7 +104,8 @@ def get_window_start_indices(n_windows: int, n_trials: int) -> np.ndarray:
     return starts[pos]
 
 
-# ================= DATA =================
+# DATA
+# ----------------------------------------------
 
 class EMGHybridDataset(Dataset):
     def __init__(self, X_raw: np.ndarray, X_feat: np.ndarray, y: np.ndarray):
@@ -212,7 +214,8 @@ def make_loaders(X_raw, X_feat, y, s):
     )
 
 
-# ================= MODEL =================
+# MODEL
+# ----------------------------------------------
 
 class AttentionPool(nn.Module):
     def __init__(self, dim: int):
@@ -297,7 +300,8 @@ class EMGHybridModel(nn.Module):
         return self.classifier(z)
 
 
-# ================= TRAIN =================
+# TRAIN
+# ----------------------------------------------
 
 def run_epoch(model, loader, criterion, optimizer=None, device="cpu"):
     is_train = optimizer is not None
@@ -362,10 +366,10 @@ def train():
 
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    print("=" * 72)
+    print("-" * 65)
     print("  EMG HYBRID CNN-LSTM — Subject-Independent NeBULA")
     print("  Raw signal branch + handcrafted feature branch")
-    print("=" * 72)
+    print("-" * 65)
     print(f"  Device         : {device}")
     print(f"  Raw input      : {X_raw.shape}")
     print(f"  Feature input  : {X_feat.shape}")
@@ -459,7 +463,7 @@ def train():
         y_true, y_pred, output_dict=True, zero_division=0
     )
 
-    print("\n" + "=" * 72)
+    print("\n" + "-" * 65)
     print("  TEST RESULTS")
     print(f"  Accuracy   : {test_acc:.4f}  ({test_acc*100:.1f}%)")
     print(f"  F1 macro   : {test_f1:.4f}")
@@ -480,7 +484,7 @@ def train():
     print(f"    {cm[0].tolist()}  ← Task 1 predicted as")
     print(f"    {cm[1].tolist()}  ← Task 2 predicted as")
     print(f"    {cm[2].tolist()}  ← Task 3 predicted as")
-    print("=" * 72)
+    print("-" * 65)
 
     torch.save(model.state_dict(), os.path.join(RESULTS_DIR, "emg_hybrid_cnn_lstm.pt"))
     np.save(os.path.join(RESULTS_DIR, "emg_hybrid_cnn_lstm_history.npy"),

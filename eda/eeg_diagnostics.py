@@ -1,7 +1,7 @@
 """
-EEG Diagnostics — NeBULA
-==========================
-One script that runs all EEG diagnostic analyses used in the dissertation.
+NeBULA Dataset - EEG Diagnostics
+-------------------------------------------------------------
+Runs a full EDA pass on windowed EEG data:
 
 Two sections:
   A. Signal quality plots (raw data — needs .vhdr files + MNE)
@@ -19,10 +19,6 @@ Two sections:
      B8. Phase summary — pre / onset / execution / late comparison
      B9. All-channel Fisher — do any of the 128 channels help?
 
-
-
-Requires MNE for sections A and B9:
-    pip install mne
 """
 
 import os
@@ -57,9 +53,9 @@ try:
 except ImportError:
     MNE_AVAILABLE = False
 
-# ─────────────────────────────────────────────
+
 #  Config
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 RAW_DATA_DIR  = "../data"  # raw BIDS data (sub-XX folders)
 PREP_DATA_DIR = "../preprocessed"   # windowed arrays from epoch.py
@@ -88,9 +84,9 @@ N_SUBJECTS_RAW  = 5     # subjects to use for section A and B9
 RANDOM_STATE    = 42
 
 
-# ─────────────────────────────────────────────
+
 #  Argument parsing
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 def parse_args():
     p = argparse.ArgumentParser(description="NeBULA EEG Diagnostics")
@@ -119,9 +115,9 @@ def get_raw_subjects(requested=None, all_subs=False):
     return found[:N_SUBJECTS_RAW]
 
 
-# ─────────────────────────────────────────────
+
 #  Signal processing helpers
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 def bandpass(data, lo, hi, fs, order=4):
     nyq = fs / 2.0
@@ -144,9 +140,9 @@ def psd_welch(data, fs):
     return f, np.array(psds)
 
 
-# ─────────────────────────────────────────────
+
 #  Raw data loaders
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 def load_eeg_raw(sid, condition):
     """Load, preprocess, and return EEG for one subject."""
@@ -171,9 +167,6 @@ def load_eeg_raw(sid, condition):
     data = resample(data, FS_RAW, FS)
     data = zscore(data, axis=-1)
     return data, available
-
-
-
 
 
 def load_events_raw(sid, condition):
@@ -217,9 +210,9 @@ def extract_epochs_raw(data, events_df, pre=100, post=400):
     return np.array(epochs), np.array(labels)
 
 
-# ─────────────────────────────────────────────
+
 #  Windowed data loader
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 def load_windowed():
     """Load preprocessed windowed arrays from epoch.py."""
@@ -241,9 +234,9 @@ def get_window_subset(X, y, s, trial_ids, win_starts, start):
     return X[mask], y[mask], s[mask], trial_ids[mask]
 
 
-# ─────────────────────────────────────────────
+
 #  Fisher and LogReg utilities
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 def fisher_score(Xf, y):
     """
@@ -278,15 +271,15 @@ def logreg_f1(X, y, s):
     return f1_score(y[te], pred, average="macro")
 
 
-# ─────────────────────────────────────────────
-#  ══════════════ SECTION A ══════════════
+
+#  SECTION A
 #  Signal quality plots (raw data)
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 def section_A(subjects, condition):
-    print("\n" + "="*65)
+    print("\n" + "-"*65)
     print("  SECTION A — EEG Signal Quality (raw data)")
-    print("="*65)
+    print("-"*65)
 
     eeg_list, ch_eeg, valid = [], [], []
 
@@ -349,15 +342,15 @@ def section_A(subjects, condition):
 
 
 
-# ─────────────────────────────────────────────
-#  ══════════════ SECTION B ══════════════
+
+#  SECTION B
 #  EEG discriminability analysis (windowed data)
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 def section_B():
-    print("\n" + "="*65)
+    print("\n" + "-"*65)
     print("  SECTION B — EEG Discriminability Analysis (preprocessed)")
-    print("="*65)
+    print("-"*65)
 
     X, y, s, trial_ids, win_starts = load_windowed()
     print(f"\n  Loaded X={X.shape}  subjects={sorted(np.unique(s).tolist())}")
@@ -680,18 +673,18 @@ def section_B():
     print(f"[B9] All-channel Fisher → {p}")
 
 
-# ─────────────────────────────────────────────
+
 #  Main
-# ─────────────────────────────────────────────
+# -------------------------------------------------
 
 def main():
     args      = parse_args()
     condition = args.condition
 
-    print("\n" + "="*65)
+    print("\n" + "-"*65)
     print("  NeBULA EEG Diagnostics")
     print("  Muskaan Garg | H00416442 | Heriot-Watt University")
-    print("="*65)
+    print("-"*65)
     print(f"  Output directory: {OUT_DIR}/")
     print(f"  MNE available   : {MNE_AVAILABLE}")
 
@@ -708,9 +701,9 @@ def main():
     if args.section in ("B", "both"):
         section_B()
 
-    print("\n" + "="*65)
+    print("\n" + "-"*65)
     print(f"  All outputs saved to: {OUT_DIR}/")
-    print("="*65)
+    print("-"*65)
 
 
 if __name__ == "__main__":

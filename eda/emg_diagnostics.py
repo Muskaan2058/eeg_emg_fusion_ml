@@ -1,3 +1,21 @@
+"""
+NeBULA Dataset - EMG Diagnostics
+-------------------------------------------------------------
+
+Runs a full EDA pass on windowed EMG data:
+   1. dataset summary
+   2. class distribution
+   3. per-subject distribution
+   4. per-class mean waveforms
+   5. per-class RMS / power per channel
+   6. PSD per class
+   7. t-SNE
+   8. Fisher scores per channel
+   9. subject separability
+  10. simple ML baselines
+"""
+
+
 import os
 import numpy as np
 import matplotlib
@@ -12,21 +30,6 @@ from sklearn.model_selection import GroupShuffleSplit
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 
-# ============================================================
-# EMG Diagnostics / EDA for NeBULA
-# ------------------------------------------------------------
-# Runs a full EDA pass on windowed EMG data:
-#   1. dataset summary
-#   2. class distribution
-#   3. per-subject distribution
-#   4. per-class mean waveforms
-#   5. per-class RMS / power per channel
-#   6. PSD per class
-#   7. t-SNE
-#   8. Fisher scores per channel
-#   9. subject separability
-#  10. simple ML baselines
-# ============================================================
 
 DATA_DIR = "../preprocessed"
 OUT_DIR = "./diagnostics_emg"
@@ -52,7 +55,7 @@ def load():
     if y.min() == 1:
         y = y - 1
 
-    print("=" * 70)
+    print("-" * 65)
     print("EMG EDA — DATA SUMMARY")
     print("=" * 70)
     print(f"X shape      : {X.shape}")
@@ -64,7 +67,7 @@ def load():
           f"Task2={(y == 2).sum()}")
     print(f"global mean  : {X.mean():.6f}")
     print(f"global std   : {X.std():.6f}")
-    print("=" * 70)
+    print("-" * 65)
     return X, y, s
 
 

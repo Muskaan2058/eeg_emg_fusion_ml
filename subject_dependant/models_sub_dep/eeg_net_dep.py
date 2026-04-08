@@ -1,28 +1,6 @@
 """
-EEGNet — Subject-Dependent EEG classifier for NeBULA
-======================================================
-Architecture: Lawhern et al. (2018)
-"EEGNet: A Compact Convolutional Neural Network for EEG-based BCIs"
-Journal of Neural Engineering. https://doi.org/10.1088/1741-2552/aace8c
-
-Official Keras reference: https://github.com/vlawhern/arl-eegmodels
-
-Input:  X_eeg_win.npy        shape (N, 15, 80)   ← windowed, from epoch.py
-        y_win.npy             shape (N,)
-        subject_ids_win.npy   shape (N,)
-
-Subject-dependent: one model trained per subject using only that
-subject's own windowed data, split chronologically by trial order.
-  Train : first 70% of windows (chronological)
-  Val   : next  15%
-  Test  : last  15%
-
-Results saved to: ../results/eegnet_sub_dep/
-
-Usage:
-    python eeg_net_dep.py
-    python eeg_net_dep.py --subjects 1 2 4
-    python eeg_net_dep.py --epochs 200
+NeBULA Dataset - EEGNet — Subject-Dependent EEG classifier
+-------------------------------------------------------------
 """
 
 import os
@@ -40,7 +18,7 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 
 class EEGNet(nn.Module):
     """
-    EEGNet (Lawhern et al. 2018) adapted for 80-sample windows.
+    EEGNet  adapted for 80-sample windows.
 
     Block 1 — temporal + depthwise spatial:
       Conv2d (1×32): learns WHEN patterns occur (160ms kernel).
@@ -92,9 +70,9 @@ class EEGNet(nn.Module):
         return self.classifier(self.block2(self.block1(x)))
 
 
-# ─────────────────────────────────────────────
+
 #  Data helpers
-# ─────────────────────────────────────────────
+# ----------------------------------------------
 
 def load_data(data_dir):
     """Load windowed EEG arrays from epoch.py output."""
@@ -131,9 +109,9 @@ def make_loaders(X, y, batch_size=16):
     return loaders
 
 
-# ─────────────────────────────────────────────
+
 #  Training
-# ─────────────────────────────────────────────
+# ----------------------------------------------
 
 def train_one_subject(X_s, y_s, cfg):
     loaders = make_loaders(X_s, y_s, batch_size=cfg['batch_size'])
@@ -194,9 +172,9 @@ def train_one_subject(X_s, y_s, cfg):
     }
 
 
-# ─────────────────────────────────────────────
+
 #  Main
-# ─────────────────────────────────────────────
+# ----------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser()
@@ -217,10 +195,9 @@ def main():
     cfg = dict(epochs=args.epochs, lr=args.lr, dropout=args.dropout,
                batch_size=args.batch, patience=args.patience)
 
-    print("=" * 60)
+    print("-" * 60)
     print("  EEGNet — Subject-Dependent NeBULA Classification")
-    print("  Lawhern et al. (2018) | github.com/vlawhern/arl-eegmodels")
-    print("=" * 60)
+    print("-" * 60)
 
     X, y, sids = load_data(args.data)
     subjects   = args.subjects if args.subjects else sorted(np.unique(sids).tolist())
@@ -252,14 +229,14 @@ def main():
         accs = [r['accuracy'] for r in all_results]
         f1s  = [r['f1_macro']  for r in all_results]
         print()
-        print("=" * 60)
+        print("-" * 60)
         print(f"  Mean accuracy : {np.mean(accs):.3f} ± {np.std(accs):.3f}")
         print(f"  Mean F1       : {np.mean(f1s):.3f}  ± {np.std(f1s):.3f}")
         print(f"  Best subject  : sub-{all_results[int(np.argmax(accs))]['subject']:02d}  "
               f"({max(accs):.3f})")
         print(f"  Worst subject : sub-{all_results[int(np.argmin(accs))]['subject']:02d}  "
               f"({min(accs):.3f})")
-        print("=" * 60)
+        print("-" * 60)
 
         out_path = os.path.join(out_dir, 'eegnet_sub_dep_results.npy')
         np.save(out_path, all_results)

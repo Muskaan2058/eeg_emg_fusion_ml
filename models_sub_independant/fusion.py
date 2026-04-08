@@ -1,12 +1,8 @@
 """
-EEG-EMG Fusion — Subject-Independent Classification (NeBULA)
-=============================================================
-EMG-anchored gated fusion model.
+NeBULA Dataset - EEG-EMG Fusion — Subject-Independent Classification
+-------------------------------------------------------------
 
-Design rationale:
-  EEG diagnostics confirmed no discriminative signal cross-subject
-  (Fisher scores ~10^-7). Rather than equal fusion, EEG is used as
-  a small optional corrective signal, controlled by a learned gate.
+EMG-anchored gated fusion model.
 
 Architecture:
   - EMG branch: same CNN+BiLSTM+attention as the standalone EMG model.
@@ -35,7 +31,9 @@ from sklearn.metrics import (
     classification_report,
 )
 
-# ================= CONFIG =================
+# CONFIG
+# ----------------------------------------------
+
 DATA_DIR    = "../preprocessed"
 RESULTS_DIR = "./results/fusion"
 
@@ -61,7 +59,7 @@ EMG_KEEP_WINDOW_STARTS = {120, 160, 200, 240, 280, 320}
 # EEG: pre-movement and onset windows (-300ms, -100ms, +100ms)
 # These are the windows most likely to contain any cortical preparation signal
 EEG_CONTEXT_STARTS = [40, 80, 120]
-# ==========================================
+
 
 
 def set_seed(seed: int):
@@ -105,7 +103,8 @@ def compute_emg_features(X: np.ndarray) -> np.ndarray:
     return np.concatenate([rms, mean, std, wl], axis=1).astype(np.float32)
 
 
-# ================= DATA =================
+#  DATA
+# ----------------------------------------------
 
 class FusionDataset(Dataset):
     def __init__(self, X_emg_raw, X_emg_feat, X_eeg_raw, y):
@@ -127,7 +126,7 @@ class FusionDataset(Dataset):
 
 
 def load_raw_arrays():
-    """Load all windowed arrays from disk."""
+    # Load all windowed arrays from disk.
     X_eeg = np.load(os.path.join(DATA_DIR, "X_eeg_win.npy")).astype(np.float32)
     X_emg = np.load(os.path.join(DATA_DIR, "X_emg_win.npy")).astype(np.float32)
     y     = np.load(os.path.join(DATA_DIR, "y_win.npy")).astype(np.int64)
@@ -267,7 +266,8 @@ def make_loaders(X_emg_raw, X_emg_feat, X_eeg_raw, y, s):
     )
 
 
-# ================= MODEL =================
+# MODEL
+# ----------------------------------------------
 
 class AttentionPool(nn.Module):
     """Soft attention over the LSTM timestep dimension."""
@@ -501,7 +501,8 @@ class EMGAnchoredFusion(nn.Module):
         return emg_logits + g * eeg_logits
 
 
-# ================= TRAIN =================
+# TRAIN
+# ----------------------------------------------
 
 def get_class_weights(y_train: np.ndarray, device):
     """Square-root inverse-frequency weights to soften class imbalance correction."""
@@ -566,10 +567,10 @@ def train():
     model    = EMGAnchoredFusion(emg_feat_dim=X_emg_feat.shape[1]).to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    print("=" * 76)
+    print("-" * 65)
     print("  EEG-EMG Fusion — Subject-Independent NeBULA Classification")
     print("  EMG-anchored with learned EEG gate")
-    print("=" * 76)
+    print("-" * 65)
     print(f"  Device         : {device}")
     print(f"  EMG raw input  : {X_emg_raw.shape}")
     print(f"  EMG feat input : {X_emg_feat.shape}")
@@ -652,7 +653,7 @@ def train():
     cm     = confusion_matrix(y_true, y_pred)
     report = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
 
-    print("\n" + "=" * 76)
+    print("\n" + "-" * 56)
     print("  TEST RESULTS")
     print(f"  Accuracy   : {test_acc:.4f}  ({test_acc*100:.1f}%)")
     print(f"  F1 macro   : {test_f1:.4f}")
@@ -673,7 +674,7 @@ def train():
     print(f"    {cm[0].tolist()}  ← Task 1 predicted as")
     print(f"    {cm[1].tolist()}  ← Task 2 predicted as")
     print(f"    {cm[2].tolist()}  ← Task 3 predicted as")
-    print("=" * 76)
+    print("-" * 65)
 
     torch.save(model.state_dict(), os.path.join(RESULTS_DIR, "fusion.pt"))
     np.save(os.path.join(RESULTS_DIR, "fusion_history.npy"), np.array(history, dtype=object))

@@ -1,26 +1,8 @@
 """
 NeBULA Dataset - Epoching, Trial Extraction & Windowing
-========================================================
+-------------------------------------------------------------
 EEG-EMG Fusion for Upper-Limb Movement Decoding
 Muskaan Garg | H00416442 | Heriot-Watt University
-
-PURPOSE:
-  Step 1 — extract trial epochs from the continuous EEG/EMG recordings
-            using G event markers (movement onset).
-  Step 2 — apply sliding window to each epoch to multiply the number
-            of training samples.
-
-WHY WINDOWING:
-  Each trial is 500 samples (2.5s). With ~29 trials per subject,
-  that's only ~20 training trials — too few for deep learning.
-  Sliding window (size=80, step=40) turns each trial into ~10 windows,
-  giving ~200 training samples per subject instead of ~20.
-
-  Window size  = 80 samples = 400ms at 200Hz
-  Step size    = 40 samples = 200ms (50% overlap)
-  Windows per trial = (500 - 80) / 40 + 1 = 11
-
-  Each window inherits the label of its parent trial.
 
 OUTPUT (saved to ./preprocessed/):
   Per-trial arrays (for timing analysis, subject-dependent):
@@ -35,11 +17,6 @@ OUTPUT (saved to ./preprocessed/):
     subject_ids_win.npy  shape (n_windows_total,)   which subject each window came from
     trial_ids_win.npy    shape (n_windows_total,)   which trial each window came from
 
-Usage:
-    python epoch.py                    # all subjects, auto-detect data folder
-    python epoch.py --all-subjects     # explicit all
-    python epoch.py --subjects 01 02   # specific subjects
-    python epoch.py /path/to/data      # explicit data root
 """
 
 import os
@@ -59,9 +36,8 @@ except ImportError:
     MNE_AVAILABLE = False
     print("WARNING: MNE not installed. Run: pip install mne")
 
-# ─────────────────────────────────────────────
 #  Constants
-# ─────────────────────────────────────────────
+# ---------------------------------------
 
 MOTOR_CH = ['C3','C4','Cz','FC3','FC4','CP3','CP4',
             'C1','C2','C5','C6','FC1','FC2','CP1','CP2']
@@ -108,14 +84,14 @@ def get_subjects(data_root, requested=None, all_subs=False):
     ])
     if requested:
         return [s.zfill(2) for s in requested]
-    if all_subs or True:   # default: always use all found
+    if all_subs or True:
         return found
-    return found[:3]       # fallback: 3 subjects
+    return found[:3]
 
 
-# ─────────────────────────────────────────────
+
 #  Signal loading & preprocessing
-# ─────────────────────────────────────────────
+# ---------------------------------------
 
 def load_events(sid, data_root):
     path = os.path.join(data_root, f'sub-{sid}', 'emg',
@@ -149,7 +125,6 @@ def load_eeg(sid, data_root):
     data = raw.get_data()   # (n_ch, n_samples) in Volts
 
     # Detrend: remove slow linear drift per channel
-    # Done after get_data() so scipy works on a plain numpy array — no MNE quirks.
     from scipy.signal import detrend
     data = detrend(data, axis=1)
 
@@ -187,12 +162,12 @@ def load_emg(sid, data_root):
     b, a = sp_signal.iirnotch(50., Q=30., fs=EMG_FS)
     data = sp_signal.filtfilt(b, a, data, axis=1)
 
-    # Rectify + RMS envelope (100ms window = 100 samples at 1000Hz)
+    # Rectify + RMS envelope - 100ms window = 100 samples at 1000Hz
     data = np.abs(data)
     win  = int(0.1 * EMG_FS)   # 100ms
     data = np.sqrt(uniform_filter1d(data**2, size=win, axis=1))
 
-    # Resample to 200 Hz using integer slicing (10:1 ratio)
+    # Resample to 200 Hz using integer slicing
     data = data[:, ::5]   # 1000Hz → 200Hz
 
     # z-score per channel
@@ -201,9 +176,9 @@ def load_emg(sid, data_root):
     return data
 
 
-# ─────────────────────────────────────────────
+
 #  Epoch extraction
-# ─────────────────────────────────────────────
+# ---------------------------------------
 
 def extract_epochs(eeg, emg, events_df):
     """
@@ -236,9 +211,8 @@ def extract_epochs(eeg, emg, events_df):
             np.array(labels))        # (n_trials,)
 
 
-# ─────────────────────────────────────────────
 #  Windowing
-# ─────────────────────────────────────────────
+# ---------------------------------------
 
 def apply_windowing(epochs, labels, win_size=WIN_SIZE, win_step=WIN_STEP):
     """
@@ -253,12 +227,7 @@ def apply_windowing(epochs, labels, win_size=WIN_SIZE, win_step=WIN_STEP):
 
     Number of windows per trial = (epoch_len - win_size) // win_step + 1
                                 = (500 - 80) // 40 + 1 = 11
-
-    Why 50% overlap (step = size/2)?
-      - Captures patterns that straddle window boundaries
-      - Doubles the number of training samples vs non-overlapping
-      - Standard in EEG/EMG literature (Schirrmeister et al. 2017)
-    """
+ """
     windows, win_labels, trial_ids = [], [], []
 
     for trial_idx, (epoch, label) in enumerate(zip(epochs, labels)):
@@ -275,9 +244,9 @@ def apply_windowing(epochs, labels, win_size=WIN_SIZE, win_step=WIN_STEP):
             np.array(trial_ids))    # (n_windows,)
 
 
-# ─────────────────────────────────────────────
+
 #  Main
-# ─────────────────────────────────────────────
+# ---------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(description='NeBULA epoch extraction + windowing')
@@ -291,10 +260,10 @@ def main():
     subjects  = get_subjects(data_root, args.subjects, args.all_subjects)
     os.makedirs(args.output, exist_ok=True)
 
-    print("=" * 65)
+    print("-" * 65)
     print("  NeBULA — Epoching & Windowing Pipeline")
     print("  Muskaan Garg | H00416442 | Heriot-Watt University")
-    print("=" * 65)
+    print("-" * 65)
     print(f"  Data root  : {data_root}")
     print(f"  Subjects   : {subjects}")
     print(f"  Epoch      : -{PRE_SAMPLES} to +{POST_SAMPLES} samples "

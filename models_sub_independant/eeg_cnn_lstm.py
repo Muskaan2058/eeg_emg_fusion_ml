@@ -1,3 +1,11 @@
+"""
+NeBULA Dataset - EMG CNN-LSTM — Subject-Independent Classification
+-------------------------------------------------------------
+
+ Cross-subject EEG classification using a CNN + BiLSTM hybrid.
+ Onset-centred windows are selected based on EEG diagnostics.
+"""
+
 import os
 import json
 import copy
@@ -14,15 +22,10 @@ from sklearn.metrics import (
     classification_report,
 )
 
-# ============================================================
-# EEG CNN-LSTM — Subject-Independent Classification (NeBULA)
-# ------------------------------------------------------------
-# Cross-subject EEG classification using a CNN + BiLSTM hybrid.
-# Onset-centred windows are selected based on EEG diagnostics.
 
-# ============================================================
+# CONFIG
+# ----------------------------------------------
 
-# ================= CONFIG =================
 DATA_DIR    = "../preprocessed"
 RESULTS_DIR = "./results/eeg_cnn_lstm"
 
@@ -45,7 +48,7 @@ WINDOW_STARTS = np.array([0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 400], dt
 # Keep only windows around movement onset (-300ms, -100ms, +100ms)
 # Selected based on EEG diagnostic analysis
 KEEP_WINDOW_STARTS = {40, 80, 120}
-# ==========================================
+
 
 
 def set_seed(seed: int):
@@ -72,7 +75,8 @@ def recover_window_starts(n_windows: int) -> np.ndarray:
     return WINDOW_STARTS[pos]
 
 
-# ================= DATA =================
+# DATA
+# ----------------------------------------------
 
 class EEGDataset(Dataset):
     def __init__(self, X: np.ndarray, y: np.ndarray):
@@ -138,7 +142,8 @@ def make_loaders(X, y, s):
     )
 
 
-# ================= MODEL =================
+# MODEL
+# ----------------------------------------------
 
 class AttentionPool(nn.Module):
     """Soft attention over the LSTM timestep dimension."""
@@ -215,7 +220,8 @@ class EEGCnnLstm(nn.Module):
         return self.classifier(x)
 
 
-# ================= TRAIN =================
+# TRAIN
+# ----------------------------------------------
 
 def run_epoch(model, loader, criterion, optimizer=None, device="cpu"):
     is_train = optimizer is not None
@@ -261,9 +267,9 @@ def train():
     model = EEGCnnLstm().to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    print("=" * 72)
+    print("-" * 65)
     print("  EEG CNN-LSTM — Subject-Independent NeBULA Classification")
-    print("=" * 72)
+    print("-" * 65)
     print(f"  Device         : {device}")
     print(f"  Input shape    : {X.shape}")
     print(f"  Window starts  : {sorted(list(KEEP_WINDOW_STARTS))}")
@@ -350,7 +356,7 @@ def train():
         y_true, y_pred, output_dict=True, zero_division=0
     )
 
-    print("\n" + "=" * 72)
+    print("\n" + "-" * 65)
     print("  TEST RESULTS")
     print(f"  Accuracy   : {test_acc:.4f}  ({test_acc*100:.1f}%)")
     print(f"  F1 macro   : {test_f1:.4f}")
@@ -371,7 +377,7 @@ def train():
     print(f"    {cm[0].tolist()}  ← Task 1 predicted as")
     print(f"    {cm[1].tolist()}  ← Task 2 predicted as")
     print(f"    {cm[2].tolist()}  ← Task 3 predicted as")
-    print("=" * 72)
+    print("-" * 65)
 
     torch.save(model.state_dict(), os.path.join(RESULTS_DIR, "eeg_cnn_lstm.pt"))
     np.save(os.path.join(RESULTS_DIR, "eeg_cnn_lstm_history.npy"),

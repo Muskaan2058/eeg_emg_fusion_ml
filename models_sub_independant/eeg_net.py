@@ -1,3 +1,11 @@
+"""
+NeBULA Dataset - EEGNet — Subject-Independent Classification
+-------------------------------------------------------------
+
+ Cross-subject EEG classification using EEGNet
+ Onset-centred windows are selected based on EEG diagnostics.
+"""
+
 import os
 import json
 import argparse
@@ -12,15 +20,8 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classification_report
 
 
-# ============================================================
-# EEGNet — Subject-Independent Classification (NeBULA)
-# ------------------------------------------------------------
-# Cross-subject EEG classification using EEGNet (Lawhern et al., 2018).
-# Onset-centred windows are selected based on EEG diagnostics.
-# ============================================================
-
-
-# ================= CONFIG =================
+# CONFIG
+# ----------------------------------------------
 
 @dataclass
 class Config:
@@ -53,7 +54,7 @@ WINDOW_STARTS = np.array([0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 400], dt
 # Keep only windows around movement onset (-300ms, -100ms, +100ms)
 # Selected based on EEG diagnostic analysis
 KEEP_WINDOW_STARTS = {40, 80, 120}
-# ==========================================
+
 
 
 def set_seed(seed: int) -> None:
@@ -72,7 +73,8 @@ def get_device() -> torch.device:
     return torch.device("cpu")
 
 
-# ================= DATA =================
+# DATA
+# ----------------------------------------------
 
 class EEGDataset(Dataset):
     def __init__(self, X: np.ndarray, y: np.ndarray):
@@ -87,12 +89,12 @@ class EEGDataset(Dataset):
         return self.X[idx], self.y[idx]
 
 
-# ================= MODEL =================
+# MODEL
+# ----------------------------------------------
 
 class EEGNet(nn.Module):
     """
     EEGNet — compact convolutional network for EEG classification.
-    Based on Lawhern et al. (2018), Journal of Neural Engineering.
 
     Block 1: Temporal Conv2d (1 x 32) + Depthwise spatial Conv2d (15 x 1).
              Temporal and spatial learning are kept separate.
@@ -155,7 +157,8 @@ class EEGNet(nn.Module):
         return self.classifier(self.block2(self.block1(x)))
 
 
-# ================= DATA LOADING =================
+# DATA LOADING
+# ----------------------------------------------
 
 def recover_window_starts(n_windows: int) -> np.ndarray:
     """
@@ -219,7 +222,8 @@ def make_loaders(X, y, s, batch_size: int):
     return train_loader, val_loader, test_loader, train_s, val_s, test_s
 
 
-# ================= TRAIN =================
+# TRAIN
+# ----------------------------------------------
 
 def run_epoch(model, loader, criterion, optimizer=None, device="cpu", grad_clip=1.0):
     is_train = optimizer is not None
@@ -403,7 +407,8 @@ def train(cfg: Config):
     print(f"  Summary → {prefix}_summary.json")
 
 
-# ================= CLI =================
+# CLI
+# ----------------------------------------------
 
 def parse_args():
     parser = argparse.ArgumentParser(description="EEGNet subject-independent NeBULA classification")

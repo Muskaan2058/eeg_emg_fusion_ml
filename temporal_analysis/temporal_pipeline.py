@@ -1,14 +1,11 @@
-# ============================================================
-# Timing Analysis Pipeline for NeBULA
-# ------------------------------------------------------------
-# RQ3: Estimate subject-specific temporal delay between EEG
-# motor-cortex ERD onset and EMG muscle activation onset.
-#
-# Expected per-subject files inside ./preprocessed/sub-XX/:
-#   sub-XX_<condition>_eeg.npy
-#   sub-XX_<condition>_emg.npy
-#   sub-XX_<condition>_labels.npy
-# ============================================================
+"""
+NeBULA Dataset - Timing Analysis Pipeline
+-------------------------------------------------------------
+
+ Estimate subject-specific temporal delay between EEG
+ motor-cortex ERD onset and EMG muscle activation onset.
+
+"""
 
 import os
 import glob
@@ -25,7 +22,9 @@ from scipy.signal import butter, sosfiltfilt, hilbert
 from scipy.stats import wilcoxon
 
 
-# ================= CONSTANTS =================
+# CONSTANTS
+# ----------------------------------------------
+
 DATA_DIR = "../preprocessed"
 OUT_DIR = "./timing_results"
 
@@ -67,7 +66,7 @@ XCORR_WINDOW_START_IDX = 60         # -200 ms
 XCORR_WINDOW_END_IDX = 220          # +600 ms
 
 TASK_LABELS = {0: "Task1", 1: "Task2", 2: "Task3"}
-# ===========================================
+
 
 
 def parse_args():
@@ -523,9 +522,9 @@ def main():
     os.makedirs(args.out_dir, exist_ok=True)
 
     roi_indices = get_eeg_roi_indices(args.eeg_roi)
-    print("=" * 72)
+    print("-" * 65)
     print("TIMING ANALYSIS PIPELINE")
-    print("=" * 72)
+    print("-" * 65)
     print(f"Data dir             : {args.data_dir}")
     print(f"Output dir           : {args.out_dir}")
     print(f"Conditions           : {args.conditions}")
@@ -535,7 +534,7 @@ def main():
     print(f"EMG min duration ms  : {args.emg_min_duration_ms}")
     print(f"EEG min duration ms  : {args.eeg_min_duration_ms}")
     print(f"EEG smoothing ms     : {args.eeg_smooth_ms}")
-    print("=" * 72)
+    print("-" * 65)
 
     sub_dirs = sorted(glob.glob(os.path.join(args.data_dir, "sub-*")))
     if args.max_subjects is not None:
@@ -584,9 +583,9 @@ def main():
     condition_task_summary = summarize_condition_task(subject_summary)
     stats_rows = run_condition_comparisons(subject_summary, args.out_dir)
 
-    print("\n" + "=" * 72)
+    print("\n" + "-" * 65)
     print("CONDITION / TASK SUMMARY")
-    print("=" * 72)
+    print("-" * 65)
     for row in condition_task_summary:
         print(
             f"{row['condition']:>8} | {row['task_name']:<5} | "

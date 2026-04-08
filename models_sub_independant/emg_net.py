@@ -1,3 +1,15 @@
+"""
+NeBULA Dataset - EMGNet — Subject-Independent Classification
+-------------------------------------------------------------
+
+ Cross-subject EMG classification using a 3-block CNN baseline.
+ Execution-phase windows only (100ms–1100ms post-onset).
+ 3 consecutive windows are concatenated per trial to provide
+ temporal context across the active movement period.
+
+"""
+
+
 import os
 import json
 import argparse
@@ -12,23 +24,10 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classification_report
 
 
-# ============================================================
-# EMGNet — Subject-Independent Classification (NeBULA)
-# ------------------------------------------------------------
-# Cross-subject EMG classification using a 3-block CNN baseline.
-# Execution-phase windows only (100ms–1100ms post-onset).
-# 3 consecutive windows are concatenated per trial to provide
-# temporal context across the active movement period.
-#
-# Expected inputs in data_dir:
-#   X_emg_win.npy       (n_windows, 11, 80)
-#   y_win.npy           (n_windows,)
-#   subject_ids_win.npy (n_windows,)
-#   trial_ids_win.npy   (n_windows,)
-# ============================================================
 
 
-# ================= CONFIG =================
+# CONFIG
+# ----------------------------------------------
 
 @dataclass
 class Config:
@@ -58,7 +57,7 @@ WINDOW_STARTS = np.array([0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 400], dt
 # Keep only execution-phase windows (approx +100ms to +1100ms post-onset).
 # EDA showed task-discriminative amplitude differences are concentrated here.
 KEEP_WINDOW_STARTS = {120, 160, 200, 240, 280, 320}
-# ==========================================
+
 
 
 def set_seed(seed: int) -> None:
@@ -77,7 +76,8 @@ def get_device() -> torch.device:
     return torch.device("cpu")
 
 
-# ================= DATA =================
+# DATA
+# ----------------------------------------------
 
 class EMGDataset(Dataset):
     def __init__(self, X: np.ndarray, y: np.ndarray):
@@ -91,7 +91,8 @@ class EMGDataset(Dataset):
         return self.X[idx], self.y[idx]
 
 
-# ================= MODEL =================
+# MODEL
+# ----------------------------------------------
 
 class EMGNet(nn.Module):
     """
@@ -147,7 +148,8 @@ class EMGNet(nn.Module):
         return self.classifier(self.features(x))
 
 
-# ================= DATA LOADING =================
+# DATA LOADING
+# ----------------------------------------------
 
 def recover_window_starts(n_windows: int) -> np.ndarray:
     """
@@ -243,7 +245,8 @@ def make_loaders(X, y, s, batch_size: int):
     return train_loader, val_loader, test_loader, train_s, val_s, test_s
 
 
-# ================= TRAIN =================
+# TRAIN
+# ----------------------------------------------
 
 def compute_class_weights(y_train: np.ndarray, n_classes: int) -> torch.Tensor:
     """Inverse-frequency class weights to handle minor class imbalance."""
@@ -302,9 +305,9 @@ def train(cfg: Config):
     ).to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    print("=" * 72)
+    print("-" * 65)
     print("  EMGNet — Subject-Independent NeBULA Classification")
-    print("=" * 72)
+    print("-" * 65)
     print(f"  Device         : {device}")
     print(f"  Input shape    : {X.shape}")
     print(f"  Window starts  : {sorted(list(KEEP_WINDOW_STARTS))}")
@@ -370,14 +373,14 @@ def train(cfg: Config):
     cm     = confusion_matrix(y_true, y_pred)
     report = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
 
-    print("\n" + "=" * 72)
+    print("\n" + "-" * 65)
     print("  TEST RESULTS")
     print(f"  Best epoch    : {best_epoch}")
     print(f"  Accuracy      : {test_acc:.4f}  ({test_acc*100:.1f}%)")
     print(f"  F1 macro      : {test_f1:.4f}")
     print("  Confusion matrix:")
     print(cm)
-    print("=" * 72)
+    print("-" * 65)
 
     prefix = os.path.join(cfg.results_dir, "emg_net")
     torch.save(model.state_dict(), prefix + ".pt")
@@ -415,7 +418,8 @@ def train(cfg: Config):
     print(f"  Summary → {prefix}_summary.json")
 
 
-# ================= CLI =================
+# CLI
+# ----------------------------------------------
 
 def parse_args():
     parser = argparse.ArgumentParser(description="EMGNet subject-independent NeBULA classification")

@@ -25,9 +25,9 @@ except ImportError:
     print("WARNING: MNE not installed. Run: pip install mne")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# PATH DETECTION — finds data/ relative to script location
-# ═══════════════════════════════════════════════════════════════════════════
+
+# PATH DETECTION
+# -------------------------------------------------
 
 def find_data_root(override=None):
     if override:
@@ -60,10 +60,6 @@ def find_data_root(override=None):
 
 
 def get_subjects(data_root, requested=None, all_subs=False):
-    """
-    Auto-detect all subject folders, excluding sub-03 (noisy EMG).
-    If requested list given, use that instead.
-    """
     found = sorted([
         d.replace('sub-', '') for d in os.listdir(data_root)
         if d.startswith('sub-') and os.path.isdir(os.path.join(data_root, d))
@@ -87,9 +83,9 @@ def get_subjects(data_root, requested=None, all_subs=False):
     return found[:3] if len(found) >= 3 else found
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+
 # ARGUMENT PARSING
-# ═══════════════════════════════════════════════════════════════════════════
+# ----------------------------------------------
 
 def parse_args():
     p = argparse.ArgumentParser(
@@ -118,9 +114,9 @@ Examples:
     return p.parse_args()
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+
 # SIGNAL PROCESSING HELPERS
-# ═══════════════════════════════════════════════════════════════════════════
+# ----------------------------------------------
 
 EEG_FS   = 1000   # original sampling rate
 EMG_FS   = 1000
@@ -164,9 +160,9 @@ def quality_report(data, label):
           f"NaNs={nans}  flat_ch={flat}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+
 # EEG LOADER
-# ═══════════════════════════════════════════════════════════════════════════
+# ----------------------------------------------
 
 def load_eeg(data_root, subject, condition):
     if not MNE_AVAILABLE:
@@ -203,9 +199,9 @@ def load_eeg(data_root, subject, condition):
     return data, available
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+
 # EMG LOADER
-# ═══════════════════════════════════════════════════════════════════════════
+# ----------------------------------------------
 
 def load_emg(data_root, subject, condition):
     csv_path = os.path.join(data_root, f"sub-{subject}", "emg",
@@ -246,9 +242,9 @@ def load_emg(data_root, subject, condition):
     return data, ch_cols
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+
 # EVENTS INSPECTOR
-# ═══════════════════════════════════════════════════════════════════════════
+# ----------------------------------------------
 
 def inspect_events(data_root, subject, condition):
     ev_path = os.path.join(data_root, f"sub-{subject}", "emg",
@@ -263,9 +259,9 @@ def inspect_events(data_root, subject, condition):
           f"| Total trials: {len(g)}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+
 # FEASIBILITY PLOTS
-# ═══════════════════════════════════════════════════════════════════════════
+# ----------------------------------------------
 
 def fig1_eeg_heatmap(eeg_list, subs, ch_list, condition, out_dir):
     n    = len(eeg_list)
@@ -374,9 +370,9 @@ def alignment_check(eeg_list, emg_list, subs):
         print(f"  sub-{sid:<6} {el:<16} {ml:<16} {ok}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+
 # MAIN
-# ═══════════════════════════════════════════════════════════════════════════
+# ----------------------------------------------
 
 def main():
     args      = parse_args()
@@ -395,10 +391,10 @@ def main():
     out_dir   = args.output
     os.makedirs(out_dir, exist_ok=True)
 
-    print("\n" + "="*65)
+    print("\n" + "-"*65)
     print("  NeBULA — Feasibility & Preprocessing Validation")
     print("  Muskaan Garg | H00416442 | Heriot-Watt University")
-    print("="*65)
+    print("-"*65)
     print(f"\n  Data root    : {data_root}")
     print(f"  All found    : {get_subjects(data_root, all_subs=True)}")
     print(f"  Processing   : {subjects}")
@@ -437,13 +433,13 @@ def main():
     print(f"\n  ── Alignment Check ──")
     alignment_check(eeg_list, emg_list, valid)
 
-    print(f"\n{'='*65}")
+    print(f"\n{'-'*65}")
     print("  FINAL SUMMARY")
-    print(f"{'='*65}")
+    print(f"{'-'*65}")
     for sid, eeg, emg in zip(valid, eeg_list, emg_list):
         print(f"  sub-{sid}  EEG={eeg.shape}  EMG={emg.shape}")
     print(f"\n  Plots saved to: {out_dir}/")
-    print("="*65)
+    print("-"*65)
 
 
 if __name__ == "__main__":
