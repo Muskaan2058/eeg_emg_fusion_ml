@@ -79,9 +79,15 @@ def compute_emg_features(X: np.ndarray) -> np.ndarray:
       - std
       - waveform length
     """
+
+    # RMS captures overall activation intensity — diagnostic analysis showed
+    # Task1 > Task2 > Task3 ordering is consistent across all 11 channels
     rms = np.sqrt(np.mean(X ** 2, axis=2))
+    # mean reflects average activation level across the window
     mean = np.mean(X, axis=2)
+    # std captures how much the signal varies within the window
     std = np.std(X, axis=2)
+    # waveform length measures total signal variation — sensitive to both frequency and amplitude
     wl = np.sum(np.abs(np.diff(X, axis=2)), axis=2)
 
     feats = np.concatenate([rms, mean, std, wl], axis=1).astype(np.float32)
@@ -174,6 +180,8 @@ def load_data():
                 ))
 
                 y_seq.append(y_t[i + 2])   # label = latest window
+                # using the last window's label since it reflects the most recent state
+                # all windows in the same trial have the same label anyway
                 s_seq.append(sid)
 
         return (
@@ -228,6 +236,7 @@ class AttentionPool(nn.Module):
 
 
 class RawSignalBranch(nn.Module):
+    # processes the raw EMG sequence through CNN + BiLSTM + attention
     def __init__(self):
         super().__init__()
 
@@ -263,6 +272,9 @@ class RawSignalBranch(nn.Module):
 
 
 class FeatureBranch(nn.Module):
+    # processes the handcrafted feature vector through a small MLP
+    # provides a direct shortcut to amplitude-based class differences
+    # that the CNN would otherwise need to learn from scratch
     def __init__(self, in_dim: int):
         super().__init__()
         self.mlp = nn.Sequential(
@@ -294,6 +306,8 @@ class EMGHybridModel(nn.Module):
         )
 
     def forward(self, x_raw, x_feat):
+        # concatenate both embeddings — raw branch learns temporal dynamics,
+        # feature branch provides explicit amplitude statistics
         z_raw = self.raw_branch(x_raw)     # (B, 128)
         z_feat = self.feat_branch(x_feat)  # (B, 32)
         z = torch.cat([z_raw, z_feat], dim=1)
@@ -316,8 +330,13 @@ def run_epoch(model, loader, criterion, optimizer=None, device="cpu"):
         yb = yb.to(device)
 
         if is_train:
+            # mild augmentation applied only during training to improve cross-subject generalisation
+            # noise scaled relative to batch std so it adapts to the signal amplitude
             noise_std = 0.01 * xb_raw.std().detach()
             xb_raw = xb_raw + noise_std * torch.randn_like(xb_raw)
+
+            # per-channel amplitude jitter — small random scaling between 0.98 and 1.02
+            # prevents the model from relying on exact amplitude values
 
             scale = torch.empty(
                 xb_raw.size(0), xb_raw.size(1), 1, device=xb_raw.device
@@ -346,6 +365,7 @@ def run_epoch(model, loader, criterion, optimizer=None, device="cpu"):
     return mean_loss, acc, f1, trues, preds
 
 def get_class_weights(y_train: np.ndarray, device):
+    # inverse-frequency weighting so minority classes contribute equally to the loss
     counts = np.bincount(y_train, minlength=N_CLASSES).astype(np.float32)
     weights = counts.sum() / (N_CLASSES * counts)
     weights = torch.tensor(weights, dtype=torch.float32, device=device)

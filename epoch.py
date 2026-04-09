@@ -39,6 +39,7 @@ except ImportError:
 #  Constants
 # ---------------------------------------
 
+# 15 motor-relevant channels
 MOTOR_CH = ['C3','C4','Cz','FC3','FC4','CP3','CP4',
             'C1','C2','C5','C6','FC1','FC2','CP1','CP2']
 
@@ -58,9 +59,8 @@ WIN_STEP  = 40    # samples (200ms, 50% overlap)
 CONDITION = 'task-free'   # unassisted condition for classification
 
 
-# ─────────────────────────────────────────────
 #  Path helpers
-# ─────────────────────────────────────────────
+# ---------------------------------------
 
 def find_data_root(explicit=None):
     candidates = [
@@ -97,6 +97,7 @@ def load_events(sid, data_root):
     path = os.path.join(data_root, f'sub-{sid}', 'emg',
                         f'sub-{sid}_{CONDITION}_events.tsv')
     ev = pd.read_csv(path, sep='\t')
+    # G events mark the start of each reaching trial
     g  = ev[ev['value'].str.startswith('G', na=False)].copy()
     g['label'] = g['type'].astype(int)     # task type: 1, 2, or 3
     return g.reset_index(drop=True)
@@ -282,7 +283,7 @@ def main():
     for sid in subjects:
         print(f"  ── Subject {sid} ──────────────────────────────────────")
 
-        # ── Load ──
+        # Load
         try:
             events = load_events(sid, data_root)
             eeg    = load_eeg(sid, data_root)
@@ -309,13 +310,13 @@ def main():
         eeg = eeg[:, :min_len]
         emg = emg[:, :min_len]
 
-        # ── Extract epochs ──
+        # Extract epochs
         eeg_ep, emg_ep, labels = extract_epochs(eeg, emg, events)
         if len(labels) == 0:
             print("    No valid epochs — skipping subject")
             continue
 
-        # ── Save per-subject trial arrays (for timing analysis) ──
+        # Save per-subject trial arrays (for timing analysis)
         sub_dir = os.path.join(args.output, f'sub-{sid}')
         os.makedirs(sub_dir, exist_ok=True)
         np.save(os.path.join(sub_dir, f'sub-{sid}_free_eeg.npy'),    eeg_ep)
@@ -323,7 +324,7 @@ def main():
         np.save(os.path.join(sub_dir, f'sub-{sid}_free_labels.npy'), labels)
         print(f"    Epochs: {eeg_ep.shape}  saved to {sub_dir}/")
 
-        # ── Apply windowing ──
+        # Apply windowing
         eeg_win, y_win, t_ids = apply_windowing(eeg_ep, labels)
         emg_win, _,     _     = apply_windowing(emg_ep, labels)
 
@@ -342,7 +343,7 @@ def main():
               f"Task3={(y_win==3).sum()})")
         loaded += 1
 
-    # ── Save combined windowed arrays ──
+    # Save combined windowed arrays
     if not all_eeg_win:
         print("\nERROR: No subjects loaded successfully.")
         return

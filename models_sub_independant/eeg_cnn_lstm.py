@@ -99,6 +99,7 @@ def load_data():
     if y.min() == 1:
         y = y - 1
 
+    # only keep the three windows closest to movement onset
     win_starts = recover_window_starts(len(X))
     keep_mask = np.isin(win_starts, list(KEEP_WINDOW_STARTS))
 
@@ -211,6 +212,7 @@ class EEGCnnLstm(nn.Module):
         )
 
     def forward(self, x):
+        # input is (B, 15, 80) — add channel dim for Conv2d which expects (B, C, H, W)
         x = x.unsqueeze(1)         # (B, 1, 15, 80)
         x = self.cnn(x)            # (B, 64, 1, 20)
         x = x.squeeze(2)           # (B, 64, 20)
@@ -241,6 +243,7 @@ def run_epoch(model, loader, criterion, optimizer=None, device="cpu"):
         loss = criterion(out, yb)
 
         if is_train:
+            # clip gradients to prevent exploding gradients in the LSTM
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
@@ -331,6 +334,7 @@ def train():
             f"lr={optimizer.param_groups[0]['lr']:.2e}"
         )
 
+        # save checkpoint if val F1 improved, or if F1 tied but loss is lower
         improved = (vf > best_val_f1) or (vf == best_val_f1 and vl < best_val_loss)
 
         if improved:
